@@ -1,107 +1,153 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-
 const API_URL = "http://localhost:4000/api/v1/transactions";
+const CATEGORY_URL = "http://localhost:4000/api/v1/categories";
 
 function Transactions() {
   const [transactions, setTransactions] = useState([]);
+   const [categories, setCategories] = useState([]);
+
   const [formData, setFormData] = useState({
     type: "",
     category: "",
-    userId: "",
+    userId: localStorage.getItem("userId") || "",
     date: "",
     description: "",
     amount: ""
   });
+
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState("");
+  const fetchCategories = async () => {
+    try {
+      const res = await axios.get(`${"http://localhost:4000/api/v1/categories/get"}`);
 
-  
+      console.log("Categories:", res.data);
+
+      setCategories(res.data.categories);
+    } catch (err) {
+      console.error("Category error:", err);
+      setError("Failed to fetch categories");
+    }
+  };
+
+  // GET all transactions
   const fetchTransactions = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/api/v1/transactions/get");
-      console.log("API response:",res.data);
+      const res = await axios.get(`${ "http://localhost:4000/api/v1/transactions/get"}`);
+
+      console.log("API response:", res.data);
+
       setTransactions(res.data.transactions);
-      console.error(err)
     } catch (err) {
+      console.error("Fetch transactions error:", err);
       setError("Failed to fetch transactions");
     }
   };
 
-  
+  // GET transaction by ID
   const fetchTransactionById = async (id) => {
     try {
-      const res = await axios.get(`${"http://localhost:4000/api/v1/transactions/get"}/${id}`);
-      setFormData({type:res.data.transaction.type,
-    category: res.data.transaction.category,
-    userId: res.data.transaction.userId._id ,
-    
-    date:  res.data.transaction.date,
-    description:  res.data.transaction.description,
-    amount:  res.data.transaction.amount});
+      const res = await axios.get(`${ "http://localhost:4000/api/v1/transactions/get"}/${id}`);
+
+      const transaction = res.data.transaction;
+
+      setFormData({
+        type: transaction.type,
+        category: transaction.category,
+        userId: transaction.userId?._id || localStorage.getItem("userId"),
+        date: transaction.date,
+        description: transaction.description,
+        amount: transaction.amount
+      });
+
       setEditingId(id);
     } catch (err) {
+      console.error(err);
       setError("Failed to fetch transaction by ID");
     }
   };
 
-  
+  // CREATE / UPDATE
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    
-    if (!formData.type || !formData.userId || !formData.date || !formData.amount) {
+    // Get user ID from localStorage
+    const userId = localStorage.getItem("userId");
+
+    if (!userId) {
+      setError("User is not logged in");
+      return;
+    }
+
+    const data = {
+      ...formData,
+      userId: userId
+    };
+
+    if (!data.type || !data.date || !data.amount) {
       setError("Please fill all required fields");
       return;
     }
 
     try {
-  if (editingId) {
-    await axios.put(
-      `http://localhost:4000/api/v1/transactions/update/${editingId}`,
-      formData
-    );
-  } else {
-    await axios.post(
-      "http://localhost:4000/api/v1/transactions/create",
-      formData
-    );
-  }
+      if (editingId) {
+        await axios.put(
+          `${ "http://localhost:4000/api/v1/transactions/update"}/${editingId}`,
+          
+          data
+        );
+      } else {
+        await axios.post(
+          `${ "http://localhost:4000/api/v1/transactions/create"}`,
+          data
+        );
+      }
 
-  setFormData({
-    type: "",
-    category: "",
-    userId: "",
-    date: "",
-    description: "",
-    amount: ""
-  });
+      // Reset form
+      setFormData({
+        type: "",
+        category: "",
+        userId: userId,
+        date: "",
+        description: "",
+        amount: ""
+      });
 
-  setEditingId(null);
-  await fetchTransactions();
+      setEditingId(null);
 
-} catch (err) {
-  console.error("Save transaction error:", err);
-  console.error("Backend response:", err.response?.data);
-  setError("Failed to save transaction");
-}}
+      await fetchTransactions();
 
+    } catch (err) {
+      console.error("Save transaction error:", err);
+      console.error("Backend response:", err.response?.data);
 
-  
+      setError(
+        err.response?.data?.message || "Failed to save transaction"
+      );
+    }
+  };
+
+  // DELETE
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${"http://localhost:4000/api/v1/transactions/delete"}/${id}`);
-      fetchTransactions();
+      await axios.delete(`${ "http://localhost:4000/api/v1/transactions/delete"}/${id}`);
+
+      await fetchTransactions();
     } catch (err) {
+      console.error(err);
       setError("Failed to delete transaction");
     }
   };
 
   useEffect(() => {
     fetchTransactions();
+    fetchCategories();
   }, []);
+
+  
 
   
     // <div style={{ padding: "20px" }}>
@@ -301,7 +347,7 @@ function Transactions() {
                 Category
               </label>
 
-              <input
+              {/* <input
                 type="text"
                 placeholder="Enter category ID"
                 value={formData.category}
@@ -319,7 +365,29 @@ function Transactions() {
                   fontSize: "14px",
                   boxSizing: "border-box",
                 }}
-              />
+              /> */} <select
+        value={formData.category}
+        onChange={(e) =>
+          setFormData({
+            ...formData,
+            category: e.target.value
+          })
+        } style={{
+                  width: "80%",
+                  padding: "11px",
+                  border: "1px solid grey",
+                  borderRadius: "5px",
+                  fontSize: "14px",
+                  boxSizing: "border-box",}}
+      >
+        <option value="">Select Category</option>
+
+        {categories.map((category) => (
+          <option key={category._id} value={category._id}>
+            {category.name}
+          </option>
+        ))} 
+      </select>
             </div>
 
             
