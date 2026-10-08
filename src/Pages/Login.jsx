@@ -57,9 +57,9 @@ function LoginForm() {
       const data = await response.json();
       setSuccess(data.message || "Login successful!");
       // setFormData({ email: "", password: "" });
-      window.localStorage.setItem("user_id: ", data.user.email);
-      window.localStorage.setItem("user_email: ", data.user.id);
-      window.localStorage.setItem("user_name: ", data.user.username);
+      window.localStorage.setItem("user_id", data.user.id);
+      // window.localStorage.setItem("user_email: ", data.user.email);
+      // window.localStorage.setItem("user_name: ", data.user.username);
     } catch (err) {
       setError(err.message);
     } finally {
