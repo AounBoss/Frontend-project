@@ -6,7 +6,11 @@ const CATEGORY_URL = "http://localhost:4000/api/v1/categories";
 
 function Transactions() {
   const [transactions, setTransactions] = useState([]);
+<<<<<<< HEAD
   const [categories, setCategories] = useState([]);
+=======
+   const [categories, setCategories] = useState([]);
+>>>>>>> 7ce74a08c22408627342e78c207f7e9a80ff71b3
 
   const [formData, setFormData] = useState({
     type: "",
@@ -20,6 +24,7 @@ function Transactions() {
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState("");
   const fetchCategories = async () => {
+<<<<<<< HEAD
     try {
       const res = await axios.get(
         `${"http://localhost:4000/api/v1/categories/get"}`,
@@ -61,6 +66,38 @@ function Transactions() {
       const res = await axios.get(
         `${"http://localhost:4000/api/v1/transactions/get"}/${id}`,
       );
+=======
+    try {
+      const res = await axios.get(`${"http://localhost:4000/api/v1/categories/get"}`);
+
+      console.log("Categories:", res.data);
+
+      setCategories(res.data.categories);
+    } catch (err) {
+      console.error("Category error:", err);
+      setError("Failed to fetch categories");
+    }
+  };
+
+  // GET all transactions
+  const fetchTransactions = async () => {
+    try {
+      const res = await axios.get(`${ "http://localhost:4000/api/v1/transactions/get"}`);
+
+      console.log("API response:", res.data);
+
+      setTransactions(res.data.transactions);
+    } catch (err) {
+      console.error("Fetch transactions error:", err);
+      setError("Failed to fetch transactions");
+    }
+  };
+
+  // GET transaction by ID
+  const fetchTransactionById = async (id) => {
+    try {
+      const res = await axios.get(`${ "http://localhost:4000/api/v1/transactions/get"}/${id}`);
+>>>>>>> 7ce74a08c22408627342e78c207f7e9a80ff71b3
 
       const transaction = res.data.transaction;
 
@@ -70,7 +107,11 @@ function Transactions() {
         userId: transaction.userId?._id || localStorage.getItem("userId"),
         date: transaction.date,
         description: transaction.description,
+<<<<<<< HEAD
         amount: transaction.amount,
+=======
+        amount: transaction.amount
+>>>>>>> 7ce74a08c22408627342e78c207f7e9a80ff71b3
       });
 
       setEditingId(id);
@@ -86,7 +127,12 @@ function Transactions() {
     setError("");
 
     // Get user ID from localStorage
+<<<<<<< HEAD
     const userId = window.localStorage.getItem("user_id");
+=======
+    const userId = localStorage.getItem("userId");
+
+>>>>>>> 7ce74a08c22408627342e78c207f7e9a80ff71b3
     if (!userId) {
       setError("User is not logged in");
       return;
@@ -94,12 +140,18 @@ function Transactions() {
 
     const data = {
       ...formData,
+<<<<<<< HEAD
       userId: userId,
     };
 
     console.log("formData Values: ", formData);
     console.log("data Values: ", data);
 
+=======
+      userId: userId
+    };
+
+>>>>>>> 7ce74a08c22408627342e78c207f7e9a80ff71b3
     if (!data.type || !data.date || !data.amount) {
       setError("Please fill all required fields");
       return;
@@ -108,6 +160,7 @@ function Transactions() {
     try {
       if (editingId) {
         await axios.put(
+<<<<<<< HEAD
           `${"http://localhost:4000/api/v1/transactions/update"}/${editingId}`,
 
           data,
@@ -132,20 +185,57 @@ function Transactions() {
       setEditingId(null);
 
       await fetchTransactions();
+=======
+          `${ "http://localhost:4000/api/v1/transactions/update"}/${editingId}`,
+          
+          data
+        );
+      } else {
+        await axios.post(
+          `${ "http://localhost:4000/api/v1/transactions/create"}`,
+          data
+        );
+      }
+
+      // Reset form
+      setFormData({
+        type: "",
+        category: "",
+        userId: userId,
+        date: "",
+        description: "",
+        amount: ""
+      });
+
+      setEditingId(null);
+
+      await fetchTransactions();
+
+>>>>>>> 7ce74a08c22408627342e78c207f7e9a80ff71b3
     } catch (err) {
       console.error("Save transaction error:", err);
       console.error("Backend response:", err.response?.data);
 
+<<<<<<< HEAD
       setError(err.response?.data?.message || "Failed to save transaction");
+=======
+      setError(
+        err.response?.data?.message || "Failed to save transaction"
+      );
+>>>>>>> 7ce74a08c22408627342e78c207f7e9a80ff71b3
     }
   };
 
   // DELETE
   const handleDelete = async (id) => {
     try {
+<<<<<<< HEAD
       await axios.delete(
         `${"http://localhost:4000/api/v1/transactions/delete"}/${id}`,
       );
+=======
+      await axios.delete(`${ "http://localhost:4000/api/v1/transactions/delete"}/${id}`);
+>>>>>>> 7ce74a08c22408627342e78c207f7e9a80ff71b3
 
       await fetchTransactions();
     } catch (err) {
@@ -159,7 +249,97 @@ function Transactions() {
     fetchCategories();
   }, []);
 
+<<<<<<< HEAD
   return (
+=======
+  
+
+  
+    // <div style={{ padding: "20px" }}>
+    //   <h2>Transactions</h2>
+    //   {error && <p style={{ color: "red" }}>{error}</p>}
+
+    //   {/* Form */}
+    //   <form onSubmit={handleSubmit} style={{ marginBottom: "20px" }}>
+    //     <input
+    //       type="text"
+    //       placeholder="Type"
+    //       value={formData.type}
+    //       onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+    //     />
+    //     <input
+    //       type="text"
+    //       placeholder="Category"
+    //       value={formData.category}
+    //       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+    //     />
+    //     <input
+    //       type="text"
+    //       placeholder="User ID"
+    //       value={formData.userId}
+    //       onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
+    //     />
+    //     <input
+    //       type="date"
+    //       value={formData.date}
+    //       onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+    //     />
+    //     <input
+    //       type="text"
+    //       placeholder="Description"
+    //       value={formData.description}
+    //       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+    //     />
+    //     <input
+    //       type="number"
+    //       placeholder="Amount"
+    //       value={formData.amount}
+    //       onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+    //     />
+    //     <button type="submit">{editingId ? "Update" : "Add"} Transaction</button>
+    //   </form>
+
+    //   Transactions Table
+    //   <table border="1" cellPadding="5">
+    //     <thead>
+    //       <tr>
+    //         <th>Type</th>
+    //         <th>Category</th>
+    //         <th>User ID</th>
+    //         <th>Date</th>
+    //         <th>Description</th>
+    //         <th>Amount</th>
+    //         <th>Actions</th>
+    //       </tr>
+    //     </thead>
+    //     <tbody>
+    //       {transactions.map((t) => (
+    //         <tr key={t._id}>
+    //           <td>{t.type}</td>
+    //           <td>{t.category}</td>
+    //           <td>{t.userId}</td>
+    //           <td>{t.date}</td>
+    //           <td>{t.description}</td>
+    //           <td>{t.amount}</td>
+    //           <td>
+    //             <button onClick={() => fetchTransactionById(t._id)}>Edit</button>
+    //             <button onClick={() => handleDelete(t._id)}>Delete</button>
+    //           </td>
+    //         </tr>
+    //       ))}
+    //     </tbody>
+    //   </table>
+    // </div>
+    return (
+  <div
+    style={{
+      minHeight: "100vh",
+      backgroundColor: "white",
+      padding: "30px",
+      
+    }}
+  >
+>>>>>>> 7ce74a08c22408627342e78c207f7e9a80ff71b3
     <div
       style={{
         minHeight: "100vh",
@@ -258,6 +438,7 @@ function Transactions() {
                 </select>
               </div>
 
+<<<<<<< HEAD
               <div>
                 <label
                   style={{
@@ -272,6 +453,9 @@ function Transactions() {
                 </label>
                 {/* 
               <input
+=======
+              {/* <input
+>>>>>>> 7ce74a08c22408627342e78c207f7e9a80ff71b3
                 type="text"
                 placeholder="Enter category ID"
                 value={formData.category}
@@ -289,6 +473,7 @@ function Transactions() {
                   fontSize: "14px",
                   boxSizing: "border-box",
                 }}
+<<<<<<< HEAD
               /> */}
                 <select
                   value={formData.category}
@@ -298,6 +483,270 @@ function Transactions() {
                       category: e.target.value,
                     })
                   }
+=======
+              /> */} <select
+        value={formData.category}
+        onChange={(e) =>
+          setFormData({
+            ...formData,
+            category: e.target.value
+          })
+        } style={{
+                  width: "80%",
+                  padding: "11px",
+                  border: "1px solid grey",
+                  borderRadius: "5px",
+                  fontSize: "14px",
+                  boxSizing: "border-box",}}
+      >
+        <option value="">Select Category</option>
+
+        {categories.map((category) => (
+          <option key={category._id} value={category._id}>
+            {category.name}
+          </option>
+        ))} 
+      </select>
+            </div>
+
+            
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "6px",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  color: "black",
+                }}
+              >
+                User ID
+              </label>
+
+              <input
+                type="text"
+                placeholder="Enter user ID"
+                value={formData.userId}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    userId: e.target.value,
+                  })
+                }
+                style={{
+                  width: "80%",
+                  padding: "11px",
+                  border: "1px solid grey",
+                  borderRadius: "5px",
+                  fontSize: "14px",
+                  boxSizing: "border-box",
+                }}
+              />
+            </div>
+
+            
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "6px",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  color: "black",
+                }}
+              >
+                Date
+              </label>
+
+              <input
+                type="date"
+                value={formData.date}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    date: e.target.value,
+                  })
+                }
+                style={{
+                  width: "80%",
+                  padding: "10px",
+                  border: "1px solid grey",
+                  borderRadius: "5px",
+                  fontSize: "14px",
+                  boxSizing: "border-box",
+                }}
+              />
+            </div>
+
+            
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "6px",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  color: "black",
+                }}
+              >
+                Description
+              </label>
+
+              <input
+                type="text"
+                placeholder="Enter description"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    description: e.target.value,
+                  })
+                }
+                style={{
+                  width: "80%",
+                  padding: "11px",
+                  border: "1px solid grey",
+                  borderRadius: "5px",
+                  fontSize: "14px",
+                  boxSizing: "border-box",
+                }}
+              />
+            </div>
+
+          
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "6px",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  color: "black",
+                }}
+              >
+                Amount
+              </label>
+
+              <input
+                type="number"
+                placeholder="Enter amount"
+                value={formData.amount}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    amount: e.target.value,
+                  })
+                }
+                style={{
+                  width: "80%",
+                  padding: "11px",
+                  border: "1px solid grey",
+                  borderRadius: "5px",
+                  fontSize: "14px",
+                  boxSizing: "border-box",
+                }}
+              />
+            </div>
+          </div>
+
+          
+          <div
+            style={{
+              marginTop: "22px",
+              display: "flex",
+              gap: "10px",
+              marginleft :"1000px"
+          
+            }}
+          >
+            <button
+              type="submit"
+              style={{
+                padding: "20px 20px",
+                backgroundColor: "blue",
+                color: "white",
+                border: "none",
+                borderRadius: "5px",
+                fontSize: "14px",
+                fontWeight: "600",
+                cursor: "pointer",
+              }}
+            >
+              {editingId ? "Update Transaction" : "Add Transaction"}
+            </button>
+
+            {editingId && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingId(null);
+                  setFormData({
+                    type: "",
+                    category: "",
+                    userId: "",
+                    date: "",
+                    description: "",
+                    amount: "",
+                  });
+                }}
+                style={{
+                  padding: "10px 20px",
+                  backgroundColor: "grey",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "5px",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+
+      {/* Transaction Table */}
+      <div
+        style={{
+          
+          borderRadius: "8px",
+          border: "1px solid white",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            padding: "20px 25px",
+            borderBottom: "1px solid grey",
+          }}
+        >
+          <h3
+            style={{
+              margin: 0,
+              fontSize: "20px",
+              color: "black",
+            }}
+          >
+            Transaction History
+          </h3>
+        </div>
+
+        <div style={{ overflowX: "auto" }}>
+          <table
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+            }}
+          >
+            <thead>
+              <tr
+                style={{
+                  backgroundColor: "white",
+                }}
+              >
+                <th
+>>>>>>> 7ce74a08c22408627342e78c207f7e9a80ff71b3
                   style={{
                     width: "100%",
                     padding: "11px",
