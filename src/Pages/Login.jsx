@@ -1,9 +1,13 @@
 import { useState } from "react";
 import {Snackbar,Alert}from "@mui/material"
+import {useNavigate} from "react-router-dom";
+
 
 const API_URL = "http://localhost:4000/api/v1/auth/login";
 
 function LoginForm() {
+  const navigate =useNavigate();
+  
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -13,6 +17,7 @@ function LoginForm() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -20,9 +25,9 @@ function LoginForm() {
 
   const validateForm = () => {
     if (!/\S+@\S+\.\S+/.test(formData.email)) return "Invalid email format";
-    if (!email || !password) {
-      setError("Email and password are required.");
-      return;
+    if (!formData.email || !formData.password) {
+      return "Email and password are required.";
+      
     }
 
     if (formData.password.length < 6)
@@ -47,24 +52,37 @@ function LoginForm() {
         method: "POST",
         headers: { "Content-Type": "application/json"},
         body: JSON.stringify(formData),
-      });
+      }); 
+      const data = await response.json();
+
+     // Redirect to registration if user does not exist
+      if (
+        response.status === 404 ||
+        data.message?.toLowerCase().includes("user not found")
+      ) {
+        navigate("/register");
+      return alert("Register yourself First!");
+      }
 
       if (!response.ok) {
         const errData = await response.json();
         throw new Error(errData.message || "Login failed");
+        
       }
 
-      const data = await response.json();
+      
       setSuccess(data.message || "Login successful!");
       // setFormData({ email: "", password: "" });
       window.localStorage.setItem("user_id", data.user.id);
       // window.localStorage.setItem("user_email: ", data.user.email);
       // window.localStorage.setItem("user_name: ", data.user.username);
+      window.location.assign('/transactions');
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
+    
   };
 
   return (
@@ -175,7 +193,7 @@ function LoginForm() {
           type="submit"
           disabled={loading}
         >
-          {loading ? "Adding..." : "Login"}
+          {loading ? "Logging..." : "Login"}
         </button>
       </form><Snackbar
         open={success}

@@ -6,6 +6,7 @@ import Login from "./Pages/Login.jsx";
 import Register from "./Pages/Register.jsx";
 import Transactions from "./Pages/Transactions1.jsx";
 import Categories from "./Pages/Categories.jsx";
+import Dashboard from "./Pages/Dashboard.jsx";
 
 import "./App.css";
 
@@ -29,6 +30,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/transactions" element={<Transactions />} />
           <Route path="/categories" element={<Categories />} />
+          <Route path="/dashboard" element={<Dashboard/>}/>
         </Routes>
       </div>
     </>

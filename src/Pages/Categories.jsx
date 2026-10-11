@@ -1,4 +1,7 @@
+import {Link} from "react-router-dom";
 import React, { useState, useEffect } from "react";
+import { Snackbar,Alert } from "@mui/material";
+
 
 // API base URL (adjust to your backend)
 const API_URL = "http://localhost:4000/api/v1categories";
@@ -108,7 +111,7 @@ function Categories() {
         padding: "30px",
       }}
     >
-      {/* Error */}
+      {/* Error
       {error && (
         <div
           style={{
@@ -121,7 +124,7 @@ function Categories() {
         >
           {error}
         </div>
-      )}
+      )} */}
       <div
         style={{
           margin: "0 auto",
@@ -288,7 +291,7 @@ function Categories() {
                   width: "100%",
                 }}
               >
-                {loading ? "Update Category" : "Add Category"}
+                {loading ? "Loading" : "Add Category"}
               </button>
 
               {loading && (
@@ -346,7 +349,23 @@ function Categories() {
               }}
             >
               Category History
-            </h3>
+            </h3> <Link to="/transactions">   <button
+              style={{
+                backgroundColor: "blue",
+                color: "white",
+                border: "none",
+                borderRadius: "5px",
+                fontSize: "10x",
+                fontWeight: "600",
+                cursor: "pointer",
+                height:  "100%",
+                width:"100%",
+                padding:"6px 12px"
+                
+                
+                
+              }} 
+            >Back To Transaction</button></Link>
           </div>
           <div style={{ overflowX: "auto", width: "100%" }}>
             <table
@@ -489,7 +508,15 @@ function Categories() {
             </table>
           </div>
         </div>
-      </div>
+      </div> <Snackbar
+              open={error}
+              autoHideDuration={3000}
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            >
+              <Alert severity="error" variant="outlined" sx={{ width: "100%" }}>
+                {error}
+              </Alert>
+            </Snackbar>
     </div>
   );
 }

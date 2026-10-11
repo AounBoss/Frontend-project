@@ -20,8 +20,15 @@ function RegistrationForm() {
   };
 
   const validateForm = () => {
-    if (!formData.username.trim()) return "Name is required";
+     if (
+    !formData.username.trim() ||
+    !formData.email.trim() ||
+    !formData.password
+  ) {
+    return "Please fill in all the fields.";
+  }
     if (!/\S+@\S+\.\S+/.test(formData.email)) return "Invalid email format";
+     
     if (formData.password.length < 6)
       return "Password must be at least 6 characters";
     return null;
