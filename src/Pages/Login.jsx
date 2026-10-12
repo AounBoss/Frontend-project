@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Snackbar, Alert } from "@mui/material";
+import { Snackbar, Alert, ToggleButton } from "@mui/material";
 import { useNavigate, Link } from "react-router-dom";
 
 const API_URL = "http://localhost:4000/api/v1/auth/login";
@@ -196,7 +196,8 @@ function LoginForm() {
             justifyContent: "center",
           }}
         >
-          <button
+          <ToggleButton
+
             style={{
               backgroundColor: "lightgreen",
               borderRadius: "8px",
@@ -207,17 +208,17 @@ function LoginForm() {
               marginTop: "38px",
             }}
             type="submit"
-            disabled={loading}
+            disabled={loading} 
           >
-            {loading ? "Logging..." : "Login"}
-          </button>
+            {loading ? "Logging..." : "Login"} 
+          </ToggleButton>
           <p
             style={{
               fontSize: "12px",
               marginTop: "10px",
             }}
           >
-            Dont have an account? <Link to="/register">Sign up</Link>
+            Dont have an account? <Link to="/register" underline="hover">Sign up</Link>
           </p>
         </div>
       </form>

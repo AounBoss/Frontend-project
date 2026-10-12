@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Snackbar, Alert } from "@mui/material";
+import { Snackbar, Alert,ToggleButton } from "@mui/material";
 import { Link } from "react-router-dom";
 
 const API_URL = "http://localhost:4000/api/v1/auth/register";
@@ -218,7 +218,7 @@ function RegistrationForm() {
             justifyContent: "center",
           }}
         >
-          <button
+          <ToggleButton
             style={{
               backgroundColor: "lightgreen",
               borderRadius: "8px",
@@ -232,7 +232,7 @@ function RegistrationForm() {
             disabled={loading}
           >
             {loading ? "Adding..." : "Register"}
-          </button>
+          </ToggleButton>
           <p
             style={{
               fontSize: "12px",
