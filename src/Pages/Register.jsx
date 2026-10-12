@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Snackbar, Alert } from "@mui/material";
+import { Link } from "react-router-dom";
 
 const API_URL = "http://localhost:4000/api/v1/auth/register";
 
@@ -20,15 +21,15 @@ function RegistrationForm() {
   };
 
   const validateForm = () => {
-     if (
-    !formData.username.trim() ||
-    !formData.email.trim() ||
-    !formData.password
-  ) {
-    return "Please fill in all the fields.";
-  }
+    if (
+      !formData.username.trim() ||
+      !formData.email.trim() ||
+      !formData.password
+    ) {
+      return "Please fill in all the fields.";
+    }
     if (!/\S+@\S+\.\S+/.test(formData.email)) return "Invalid email format";
-     
+
     if (formData.password.length < 6)
       return "Password must be at least 6 characters";
     return null;
@@ -65,7 +66,7 @@ function RegistrationForm() {
       setSuccess(data.message || "Registration successful!");
       // setFormData({ username: "", email: "", password: "" });
       // now redirect the user to the login page
-      window.location.assign('/login')
+      window.location.assign("/login");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -187,29 +188,60 @@ function RegistrationForm() {
             onChange={handleChange}
             placeholder="Enter your password"
           ></input>
-          <input
-            type="checkbox"
-            checked={showPassword}
-            onChange={() => setShowPassword((prev) => !prev)}
-          />
-          Show Password
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "end",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={showPassword}
+              onChange={() => setShowPassword((prev) => !prev)}
+            />
+            <p
+              style={{
+                fontSize: "12px",
+              }}
+            >
+              Show Password
+            </p>
+          </div>
         </div>
-
-        <button
+        <div
           style={{
-            backgroundColor: "lightgreen",
-            borderRadius: "8px",
-            width: "220px",
-            height: "35px",
-            boxShadow: "none",
-            border: "none",
-            marginTop: "38px",
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
           }}
-          type="submit"
-          disabled={loading}
         >
-          {loading ? "Adding..." : "Register"}
-        </button>
+          <button
+            style={{
+              backgroundColor: "lightgreen",
+              borderRadius: "8px",
+              width: "220px",
+              height: "35px",
+              boxShadow: "none",
+              border: "none",
+              marginTop: "38px",
+            }}
+            type="submit"
+            disabled={loading}
+          >
+            {loading ? "Adding..." : "Register"}
+          </button>
+          <p
+            style={{
+              fontSize: "12px",
+              marginTop: "10px",
+            }}
+          >
+            Already have an account? <Link to="/login">Login</Link>
+          </p>
+        </div>
       </form>
       <Snackbar
         open={success}

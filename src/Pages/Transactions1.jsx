@@ -1,9 +1,8 @@
 import Dashboard from "./Dashboard.jsx";
-import {Link} from "react-router-dom";
-import { useNavigate } from 'react-router-dom';
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Snackbar,Alert } from "@mui/material";
-
+import { Snackbar, Alert } from "@mui/material";
 
 import axios from "axios";
 
@@ -11,11 +10,9 @@ const API_URL = "http://localhost:4000/api/v1/transactions";
 const CATEGORY_URL = "http://localhost:4000/api/v1/categories";
 
 function Transactions() {
-   const userId = window.localStorage.getItem("user_id")
+  const userId = window.localStorage.getItem("user_id");
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
-  
-
 
   const [formData, setFormData] = useState({
     type: "",
@@ -25,6 +22,9 @@ function Transactions() {
     description: "",
     amount: "",
   });
+  const sortedTransactions = [...transactions].sort(
+    (a, b) => new Date(b.date) - new Date(a.date),
+  );
 
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState("");
@@ -32,11 +32,12 @@ function Transactions() {
     try {
       const res = await axios.get(
         `${"http://localhost:4000/api/v1/categories/get"}`,
-      {
+        {
           headers: {
             "X-User-Id": userId,
           },
-        },);
+        },
+      );
 
       console.log("Categories:", res.data);
 
@@ -49,8 +50,6 @@ function Transactions() {
 
   // GET all transactions
   const fetchTransactions = async () => {
-    
-    
     try {
       const res = await axios.get(
         `${"http://localhost:4000/api/v1/transactions/get"}`,
@@ -79,11 +78,12 @@ function Transactions() {
 
       setFormData({
         type: transaction.type,
-        category:typeof transaction.category === "object"
-      ? transaction.category._id || ""
-      : transaction.category || "",
+        category:
+          typeof transaction.category === "object"
+            ? transaction.category._id || ""
+            : transaction.category || "",
         userId: transaction.userId?._id || localStorage.getItem("userId"),
-        date: transaction.date? String(transaction.date).slice(0, 10) : "",
+        date: transaction.date ? String(transaction.date).slice(0, 10) : "",
         description: transaction.description,
         amount: transaction.amount,
       });
@@ -109,11 +109,7 @@ function Transactions() {
 
     const data = {
       ...formData,
-      userId:userId,
-       
-
-      
-      
+      userId: userId,
     };
 
     console.log("formData Values: ", formData);
@@ -171,27 +167,27 @@ function Transactions() {
       console.error(err);
       setError("Failed to delete transaction");
     }
-  };const navigate = useNavigate();
+  };
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
       // 1. Call the logout API with the user ID
-      await fetch('/api/logout', {
-        method: 'POST',
+      await fetch("/api/logout", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ userId }),
       });
 
       // 2. Clear local storage (or specific items)
-       localStorage.clear()
-      
+      localStorage.clear();
 
       // 3. Redirect to login page
-      navigate('/login');
+      navigate("/login");
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error("Logout failed:", error);
     }
   };
 
@@ -201,15 +197,16 @@ function Transactions() {
   }, []);
 
   return (
-   <div>  <Dashboard/> 
-    <div
-      style={{
-        minHeight: "100vh",
-        backgroundColor: "white",
-        padding: "30px",
-      }}
-    >
-      {/* Error
+    <div>
+      <Dashboard />
+      <div
+        style={{
+          minHeight: "100vh",
+          backgroundColor: "white",
+          padding: "30px",
+        }}
+      >
+        {/* Error
       {error && (
         <div
           style={{
@@ -223,96 +220,96 @@ function Transactions() {
           {error}
         </div>
       )} */}
-      <div
-        style={{
-          margin: "0 auto",
-          display: "flex",
-          gap: "40px",
-        }}
-      >
         <div
           style={{
-            borderRadius: "8px",
-            border: "1px solid white",
-            flexDirection: "column",
-            alignItems: "start",
+            margin: "0 auto",
             display: "flex",
-            flex: 1.5,
+            gap: "40px",
           }}
         >
-          <h3
+          <div
             style={{
-              // margin: "0 0 20px 0",
-              color: "black",
-              fontSize: "20px",
+              borderRadius: "8px",
+              border: "1px solid white",
+              flexDirection: "column",
+              alignItems: "start",
+              display: "flex",
+              flex: 1.5,
             }}
           >
-            {editingId ? "Edit Transaction" : "Add Transaction"}
-          </h3>
-
-          <form
-            onSubmit={handleSubmit}
-            style={{
-              width: "100%",
-            }}
-          >
-            <div
+            <h3
               style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "8px",
+                // margin: "0 0 20px 0",
+                color: "black",
+                fontSize: "20px",
               }}
             >
-              <div style={{}}>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: "6px",
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    color: "black",
-                  }}
-                >
-                  Type
-                </label>
+              {editingId ? "Edit Transaction" : "Add Transaction"}
+            </h3>
 
-                <select
-                  value={formData.type}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      type: e.target.value,
-                    })
-                  }
-                  style={{
-                    width: "100%",
-                    padding: "11px",
-                    border: "1px solid grey",
-                    borderRadius: "5px",
-                    fontSize: "14px",
-                    backgroundColor: "white",
-                    boxSizing: "border-box",
-                  }}
-                >
-                  <option value="">Select Type</option>
-                  <option value="Income">Income</option>
-                  <option value="Expense">Expense</option>
-                </select>
-              </div>
+            <form
+              onSubmit={handleSubmit}
+              style={{
+                width: "100%",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "8px",
+                }}
+              >
+                <div style={{}}>
+                  <label
+                    style={{
+                      display: "block",
+                      marginBottom: "6px",
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      color: "black",
+                    }}
+                  >
+                    Type
+                  </label>
 
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: "6px",
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    color: "black",
-                  }}
-                >
-                  Category
-                </label>
-                {/* 
+                  <select
+                    value={formData.type}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        type: e.target.value,
+                      })
+                    }
+                    style={{
+                      width: "100%",
+                      padding: "11px",
+                      border: "1px solid grey",
+                      borderRadius: "5px",
+                      fontSize: "14px",
+                      backgroundColor: "white",
+                      boxSizing: "border-box",
+                    }}
+                  >
+                    <option value="">Select Type</option>
+                    <option value="Income">Income</option>
+                    <option value="Expense">Expense</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    style={{
+                      display: "block",
+                      marginBottom: "6px",
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      color: "black",
+                    }}
+                  >
+                    Category
+                  </label>
+                  {/* 
               <input
                 type="text"
                 placeholder="Enter category ID"
@@ -332,479 +329,482 @@ function Transactions() {
                   boxSizing: "border-box",
                 }}
               /> */}
-                <select
-                  value={formData.category}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      category: e.target.value,
-                    })
-                  }
-                  style={{
-                    width: "100%",
-                    padding: "11px",
-                    border: "1px solid grey",
-                    borderRadius: "5px",
-                    fontSize: "14px",
-                    boxSizing: "border-box",
-                  }}
-                >
-                  <option value="">Select Category</option>
-
-                  {categories.map((category) => (
-                    <option key={category._id} value={category._id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: "6px",
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    color: "black",
-                  }}
-                >
-                  Date
-                </label>
-
-                <input
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      date: e.target.value,
-                    })
-                  }
-                  style={{
-                    width: "100%",
-                    padding: "10px",
-                    border: "1px solid grey",
-                    borderRadius: "5px",
-                    fontSize: "14px",
-                    boxSizing: "border-box",
-                  }}
-                />
-              </div>
-
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: "6px",
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    color: "black",
-                  }}
-                >
-                  Description
-                </label>
-
-                <input
-                  type="text"
-                  placeholder="Enter description"
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      description: e.target.value,
-                    })
-                  }
-                  style={{
-                    width: "100%",
-                    padding: "11px",
-                    border: "1px solid grey",
-                    borderRadius: "5px",
-                    fontSize: "14px",
-                    boxSizing: "border-box",
-                  }}
-                />
-              </div>
-
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: "6px",
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    color: "black",
-                  }}
-                >
-                  Amount
-                </label>
-
-                <input
-                  type="number"
-                  placeholder="Enter amount"
-                  value={formData.amount}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      amount: e.target.value,
-                    })
-                  }
-                  style={{
-                    width: "100%",
-                    padding: "11px",
-                    border: "1px solid grey",
-                    borderRadius: "5px",
-                    fontSize: "14px",
-                    boxSizing: "border-box",
-                  }}
-                />
-              </div>
-            </div>
-
-            <div
-              style={{
-                marginTop: "22px",
-                display: "flex",
-                flex: 2,
-                gap: "10px",
-                // marginleft: "1000px",
-              }}
-            >
-              <button
-                type="submit"
-                style={{
-                  padding: "20px 20px",
-                  backgroundColor: "blue",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "5px",
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                  width: "100%",
-                }}
-              >
-                {editingId ? "Update Transaction" : "Add Transaction"}
-              </button>
-
-              {editingId && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingId(null);
-                    setFormData({
-                      type: "",
-                      category: "",
-                      userId: "",
-                      date: "",
-                      description: "",
-                      amount: "",
-                    });
-                  }}
-                  style={{
-                    padding: "10px 20px",
-                    backgroundColor: "grey",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "5px",
-                    fontSize: "14px",
-                    cursor: "pointer",
-                  }}
-                >
-                  Cancel
-                </button>
-              )}
-            </div>
-          </form>
-        </div>
-
-        {/* Transaction Table */}
-        <div
-          style={{
-            borderRadius: "8px",
-            border: "1px solid white",
-            overflow: "hidden",
-            display: "flex",
-            flex: 3,
-            flexDirection: "column",
-            alignItems: "start",
-          }}
-        >
-          <div
-            style={{
-              marginBottom: "14px",
-              display: "flex",
-              justifyContent: "space-between",
-              width: "100%",
-              alignItems: "center",
-            }}
-          >
-            <h3
-              style={{
-                fontSize: "20px",
-                color: "black",
-              }}
-            >
-              Transaction History
-            </h3>
-     <div style={{display:"flex",gap:"20px"}}> <Link to="/categories">   <button
-              style={{
-                backgroundColor: "blue",
-                color: "white",
-                border: "none",
-                borderRadius: "5px",
-                fontSize: "10x",
-                fontWeight: "600",
-                cursor: "pointer",
-                height:  "100%",
-                width:"100%",
-                padding:"6px 12px ",
-                marginRight:"30px",
-                marginBottom:"1px"
-                
-                
-                
-                
-                
-              }} 
-            >
-              Add Category
-            </button></Link> <button onClick={handleLogout}
-              style={{
-                backgroundColor: "blue",
-                color: "white",
-                border: "none",
-                borderRadius: "5px",
-                fontSize: "10x",
-                fontWeight: "600",
-                cursor: "pointer",
-                height:  "100%",
-                width:"100% ",
-                padding:" 20px 15px ",
-                marginTop:"2px",
-                
-              
-                
-                
-                
-                
-              }} 
-            >Logout</button></div>
-          </div>
-
-          <div style={{ overflowX: "auto", width: "100%" }}>
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-              }}
-            >
-              <thead>
-                <tr
-                  style={{
-                    backgroundColor: "white",
-                  }}
-                >
-                  <th
+                  <select
+                    value={formData.category}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        category: e.target.value,
+                      })
+                    }
                     style={{
-                      padding: "13px 15px",
-                      borderBottom: "1px solid white",
-                      textAlign: "left",
-                      fontSize: "13px",
-                      color: "black",
+                      width: "100%",
+                      padding: "11px",
+                      border: "1px solid grey",
+                      borderRadius: "5px",
+                      fontSize: "14px",
+                      boxSizing: "border-box",
                     }}
                   >
-                    Type
-                  </th>
+                    <option value="">Select Category</option>
 
-                  <th
-                    style={{
-                      padding: "13px 15px",
-                      borderBottom: "1px solid grey",
-                      textAlign: "left",
-                      fontSize: "13px",
-                      color: "grey",
-                    }}
-                  >
-                    Category
-                  </th>
+                    {categories.map((category) => (
+                      <option key={category._id} value={category._id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                  <th
+                <div>
+                  <label
                     style={{
-                      padding: "13px 15px",
-                      borderBottom: "1px solid grey",
-                      textAlign: "left",
-                      fontSize: "13px",
+                      display: "block",
+                      marginBottom: "6px",
+                      fontSize: "14px",
+                      fontWeight: "600",
                       color: "black",
                     }}
                   >
                     Date
-                  </th>
+                  </label>
 
-                  <th
+                  <input
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        date: e.target.value,
+                      })
+                    }
                     style={{
-                      padding: "13px 15px",
-                      borderBottom: "1px solid grey",
-                      textAlign: "left",
-                      fontSize: "13px",
+                      width: "100%",
+                      padding: "10px",
+                      border: "1px solid grey",
+                      borderRadius: "5px",
+                      fontSize: "14px",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label
+                    style={{
+                      display: "block",
+                      marginBottom: "6px",
+                      fontSize: "14px",
+                      fontWeight: "600",
                       color: "black",
                     }}
                   >
                     Description
-                  </th>
+                  </label>
 
-                  <th
+                  <input
+                    type="text"
+                    placeholder="Enter description"
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        description: e.target.value,
+                      })
+                    }
                     style={{
-                      padding: "13px 15px",
-                      borderBottom: "1px solid grey",
-                      textAlign: "left",
-                      fontSize: "13px",
-                      color: "grey",
+                      width: "100%",
+                      padding: "11px",
+                      border: "1px solid grey",
+                      borderRadius: "5px",
+                      fontSize: "14px",
+                      boxSizing: "border-box",
                     }}
-                  >
-                    Amount
-                  </th>
+                  />
+                </div>
 
-                  <th
+                <div>
+                  <label
                     style={{
-                      padding: "13px 15px",
-                      borderBottom: "1px solid grey",
-                      textAlign: "left",
-                      fontSize: "13px",
+                      display: "block",
+                      marginBottom: "6px",
+                      fontSize: "14px",
+                      fontWeight: "600",
                       color: "black",
                     }}
                   >
-                    Actions
-                  </th>
-                </tr>
-              </thead>
+                    Amount
+                  </label>
 
-              <tbody>
-                {transactions.length > 0 ? (
-                  transactions.map((t) => (
-                    <tr key={t._id}>
-                      <td
-                        style={{
-                          padding: "13px 15px",
-                          borderBottom: "1px solid grey",
-                        }}
-                      >
-                        <span
+                  <input
+                    type="number"
+                    placeholder="Enter amount"
+                    value={formData.amount}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        amount: e.target.value,
+                      })
+                    }
+                    style={{
+                      width: "100%",
+                      padding: "11px",
+                      border: "1px solid grey",
+                      borderRadius: "5px",
+                      fontSize: "14px",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div
+                style={{
+                  marginTop: "22px",
+                  display: "flex",
+                  flex: 2,
+                  gap: "10px",
+                  // marginleft: "1000px",
+                }}
+              >
+                <button
+                  type="submit"
+                  style={{
+                    padding: "20px 20px",
+                    backgroundColor: "blue",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "5px",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                    width: "100%",
+                  }}
+                >
+                  {editingId ? "Update Transaction" : "Add Transaction"}
+                </button>
+
+                {editingId && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingId(null);
+                      setFormData({
+                        type: "",
+                        category: "",
+                        userId: "",
+                        date: "",
+                        description: "",
+                        amount: "",
+                      });
+                    }}
+                    style={{
+                      padding: "10px 20px",
+                      backgroundColor: "grey",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "5px",
+                      fontSize: "14px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+            </form>
+          </div>
+
+          {/* Transaction Table */}
+          <div
+            style={{
+              borderRadius: "8px",
+              border: "1px solid white",
+              overflow: "hidden",
+              display: "flex",
+              flex: 3,
+              flexDirection: "column",
+              alignItems: "start",
+            }}
+          >
+            <div
+              style={{
+                marginBottom: "14px",
+                display: "flex",
+                justifyContent: "space-between",
+                width: "100%",
+                alignItems: "center",
+              }}
+            >
+              <h3
+                style={{
+                  fontSize: "20px",
+                  color: "black",
+                }}
+              >
+                Transaction History
+              </h3>
+              <div style={{ display: "flex", gap: "20px" }}>
+                {" "}
+                <Link to="/categories">
+                  {" "}
+                  <button
+                    style={{
+                      backgroundColor: "blue",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "5px",
+                      fontSize: "10x",
+                      fontWeight: "600",
+                      cursor: "pointer",
+                      height: "100%",
+                      width: "100%",
+                      padding: "6px 12px ",
+                      marginRight: "30px",
+                      marginBottom: "1px",
+                    }}
+                  >
+                    Add Category
+                  </button>
+                </Link>{" "}
+                <button
+                  onClick={handleLogout}
+                  style={{
+                    backgroundColor: "blue",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "5px",
+                    fontSize: "10x",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                    height: "100%",
+                    width: "100% ",
+                    padding: " 20px 15px ",
+                    marginTop: "2px",
+                  }}
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+
+            <div style={{ overflowX: "auto", width: "100%" }}>
+              <table
+                style={{
+                  width: "100%",
+                  borderCollapse: "collapse",
+                }}
+              >
+                <thead>
+                  <tr
+                    style={{
+                      backgroundColor: "white",
+                    }}
+                  >
+                    <th
+                      style={{
+                        padding: "13px 15px",
+                        borderBottom: "1px solid white",
+                        textAlign: "left",
+                        fontSize: "13px",
+                        color: "black",
+                      }}
+                    >
+                      Type
+                    </th>
+
+                    <th
+                      style={{
+                        padding: "13px 15px",
+                        borderBottom: "1px solid grey",
+                        textAlign: "left",
+                        fontSize: "13px",
+                        color: "grey",
+                      }}
+                    >
+                      Category
+                    </th>
+
+                    <th
+                      style={{
+                        padding: "13px 15px",
+                        borderBottom: "1px solid grey",
+                        textAlign: "left",
+                        fontSize: "13px",
+                        color: "black",
+                      }}
+                    >
+                      Date
+                    </th>
+
+                    <th
+                      style={{
+                        padding: "13px 15px",
+                        borderBottom: "1px solid grey",
+                        textAlign: "left",
+                        fontSize: "13px",
+                        color: "black",
+                      }}
+                    >
+                      Description
+                    </th>
+
+                    <th
+                      style={{
+                        padding: "13px 15px",
+                        borderBottom: "1px solid grey",
+                        textAlign: "left",
+                        fontSize: "13px",
+                        color: "grey",
+                      }}
+                    >
+                      Amount
+                    </th>
+
+                    <th
+                      style={{
+                        padding: "13px 15px",
+                        borderBottom: "1px solid grey",
+                        textAlign: "left",
+                        fontSize: "13px",
+                        color: "black",
+                      }}
+                    >
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {transactions.length > 0 ? (
+                    sortedTransactions.map((t) => (
+                      <tr key={t._id}>
+                        <td
                           style={{
-                            padding: "4px 9px",
-                            borderRadius: "4px",
-                            backgroundColor:
-                              t.type === "Income" ? "white" : "white",
-                            color: t.type === "Income" ? "green" : "red",
-                            fontSize: "12px",
+                            padding: "13px 15px",
+                            borderBottom: "1px solid grey",
+                          }}
+                        >
+                          <span
+                            style={{
+                              padding: "4px 9px",
+                              borderRadius: "4px",
+                              backgroundColor:
+                                t.type === "Income" ? "white" : "white",
+                              color: t.type === "Income" ? "green" : "red",
+                              fontSize: "12px",
+                              fontWeight: "600",
+                            }}
+                          >
+                            {t.type}
+                          </span>
+                        </td>
+
+                        <td
+                          style={{
+                            padding: "13px 15px",
+                            borderBottom: "1px solid grey",
+                          }}
+                        >
+                          {t.category?.name || "-"}
+                        </td>
+
+                        <td
+                          style={{
+                            padding: "13px 15px",
+                            borderBottom: "1px solid grey",
+                          }}
+                        >
+                          {t.date
+                            ? new Date(t.date).toLocaleDateString("en-GB")
+                            : "-"}
+                        </td>
+
+                        <td
+                          style={{
+                            padding: "13px 15px",
+                            borderBottom: "1px solid grey",
+                          }}
+                        >
+                          {t.description || "-"}
+                        </td>
+
+                        <td
+                          style={{
+                            padding: "13px 15px",
+                            borderBottom: "1px solid white",
                             fontWeight: "600",
                           }}
                         >
-                          {t.type}
-                        </span>
-                      </td>
+                          {t.amount}
+                        </td>
 
-                      <td
-                        style={{
-                          padding: "13px 15px",
-                          borderBottom: "1px solid grey",
-                        }}
-                      >
-                        {t.category|| "-"}
-                      </td>
-
-                      <td
-                        style={{
-                          padding: "13px 15px",
-                          borderBottom: "1px solid grey",
-                        }}
-                      >
-                        {t.date ? new Date(t.date).toLocaleDateString("en-GB") : "-"}
-                      </td>
-
-                      <td
-                        style={{
-                          padding: "13px 15px",
-                          borderBottom: "1px solid grey",
-                        }}
-                      >
-                        {t.description || "-"}
-                      </td>
-
-                      <td
-                        style={{
-                          padding: "13px 15px",
-                          borderBottom: "1px solid white",
-                          fontWeight: "600",
-                        }}
-                      >
-                        {t.amount}
-                      </td>
-
-                      <td
-                        style={{
-                          padding: "13px 15px",
-                          borderBottom: "1px solid grey",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        <button
-                          onClick={() => fetchTransactionById(t._id)}
+                        <td
                           style={{
-                            padding: "6px 12px",
-                            marginRight: "6px",
-                            backgroundColor: "blue",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "4px",
-                            cursor: "pointer",
+                            padding: "13px 15px",
+                            borderBottom: "1px solid grey",
+                            whiteSpace: "nowrap",
                           }}
                         >
-                          Edit
-                        </button>
+                          <button
+                            onClick={() => fetchTransactionById(t._id)}
+                            style={{
+                              padding: "6px 12px",
+                              marginRight: "6px",
+                              backgroundColor: "blue",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "4px",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Edit
+                          </button>
 
-                        <button
-                          onClick={() => handleDelete(t._id)}
-                          style={{
-                            padding: "6px 12px",
-                            backgroundColor: "red",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                          }}
-                        >
-                          Delete
-                        </button>
-                      </td>
+                          <button
+                            onClick={() => handleDelete(t._id)}
+                            style={{
+                              padding: "6px 12px",
+                              backgroundColor: "red",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "4px",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="7"
+                        style={{
+                          padding: "30px",
+                          textAlign: "center",
+                          color: "black",
+                        }}
+                      ></td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan="7"
-                      style={{
-                        padding: "30px",
-                        textAlign: "center",
-                        color: "black",
-                      }}
-                    ></td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </div>
-    </div> <Snackbar
-            open={error}
-            autoHideDuration={3000}
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-          >
-            <Alert severity="error" variant="outlined" sx={{ width: "100%" }}>
-              {error}
-            </Alert>
-          </Snackbar></div>
+      </div>{" "}
+      <Snackbar
+        open={error}
+        autoHideDuration={3000}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert severity="error" variant="outlined" sx={{ width: "100%" }}>
+          {error}
+        </Alert>
+      </Snackbar>
+    </div>
   );
 }
 export default Transactions;

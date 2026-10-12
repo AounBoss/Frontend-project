@@ -1,31 +1,43 @@
-
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 
 function Dashboard() {
-    const userId = localStorage.getItem("user_id");
+  const userId = localStorage.getItem("user_id");
+
   const [stats, setStats] = useState({
     totalIncome: 0,
     totalExpense: 0,
     balance: 0,
   });
 
- 
-useEffect(() => {
-  axios
-    .get("http://localhost:4000/api/v1/dashboard/get", {
-      headers: {
-        "X-User-Id": userId,
-      },
-    })
-    .then((res) => {
-      setStats(res.data.data);
-    })
-    .catch((err) => {
-      console.log(err.response?.data || err.message);
-    });
-}, [userId]);
+  const fetchStats = async () => {
+    if (!userId) return;
 
+    try {
+      const res = await axios.get(
+        "http://localhost:4000/api/v1/dashboard/get",
+        {
+          headers: {
+            "X-User-Id": userId,
+          },
+        },
+      );
+
+      setStats(res.data.data);
+    } catch (err) {
+      console.error(err.response?.data || err.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+
+    const interval = setInterval(() => {
+      fetchStats();
+    }, 5000);
+
+    return () => clearInterval(interval); // Cleanup
+  }, []);
 
   const cardStyle = {
     padding: "20px",
@@ -62,4 +74,3 @@ useEffect(() => {
 }
 
 export default Dashboard;
-

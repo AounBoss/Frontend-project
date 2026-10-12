@@ -11,7 +11,7 @@ function Categories() {
   const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
-    type: "",
+    
     budget: "",
     userId: userId || "",
   });
@@ -58,7 +58,7 @@ function Categories() {
     console.log("data Values: ", data);
 
     // Basic validation
-    if (!formData.name || !formData.type || !formData.budget) {
+    if (!formData.name  ) {
       setError("All fields are required.");
       return;
     }
@@ -71,7 +71,7 @@ function Categories() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             name: formData.name,
-            type: formData.type,
+            
             budget: Number(formData.budget),
             userId: formData.userId,
           }),
@@ -79,7 +79,7 @@ function Categories() {
       );
       if (!res.ok) throw new Error(`Error: ${res.status}`);
       await fetchCategories(); // Refresh list
-      setFormData({ name: "", type: "", budget: "", userId: userId });
+      setFormData({ name: "", budget: "", userId: userId });
     } catch (err) {
       setError(err.message);
     }
@@ -165,7 +165,7 @@ function Categories() {
                 gap: "8px",
               }}
             >
-              <div style={{}}>
+              {/* <div style={{}}>
                 <label
                   style={{
                     display: "block",
@@ -200,7 +200,7 @@ function Categories() {
                   <option value="Income">Income</option>
                   <option value="Expense">Expense</option>
                 </select>
-              </div>
+              </div> */}
               <div>
                 <label
                   style={{
@@ -380,7 +380,7 @@ function Categories() {
                     backgroundColor: "white",
                   }}
                 >
-                  <th
+                  {/* <th
                     style={{
                       padding: "13px 15px",
                       borderBottom: "1px solid white",
@@ -390,7 +390,7 @@ function Categories() {
                     }}
                   >
                     Type
-                  </th>
+                  </th> */}
                   <th
                     style={{
                       padding: "13px 15px",
@@ -432,7 +432,7 @@ function Categories() {
                 {categories.length > 0 ? (
                   categories.map((c) => (
                     <tr key={c._id}>
-                      <td
+                      {/* <td
                         style={{
                           padding: "13px 15px",
                           borderBottom: "1px solid grey",
@@ -451,7 +451,7 @@ function Categories() {
                         >
                           {c.type}
                         </span>
-                      </td>
+                      </td> */}
                       <td
                         style={{
                           padding: "13px 15px",
