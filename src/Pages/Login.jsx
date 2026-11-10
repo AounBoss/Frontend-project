@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Snackbar, Alert, ToggleButton } from "@mui/material";
 import { useNavigate, Link } from "react-router-dom";
+import API from "../api/axios";
 
 const API_URL = "http://localhost:4000/api/v1/auth/login";
 
@@ -32,52 +33,111 @@ function LoginForm() {
     return null;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError();
-    setSuccess("");
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
+  setSuccess("");
 
-    const validationError = validateForm();
-    if (validationError) {
-      setError(validationError);
+  const validationError = validateForm();
+
+  if (validationError) {
+    setError(validationError);
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const response = await API.post(
+      "http://localhost:4000/api/v1/auth/login",
+      formData,
+      // {
+      //   withCredentials: true,
+      // }
+    );
+
+    const data = response.data;
+
+    localStorage.setItem("isLoggedIn", "true");
+
+    setSuccess(data.message || "Login successful!");
+
+    window.location.reload();
+
+  } catch (err) {
+
+    // Redirect to registration if user does not exist
+    if (
+      err.response?.status === 404 ||
+      err.response?.data?.message?.toLowerCase().includes("user not found")
+    ) {
+      navigate("/register");
+      alert("Register yourself First!");
       return;
     }
 
-    try {
-      setLoading(true);
-      const response = await fetch("http://localhost:4000/api/v1/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      const data = await response.json();
+    setError(
+      err.response?.data?.message || "Invalid login"
+    );
 
-      // Redirect to registration if user does not exist
-      if (
-        response.status === 404 ||
-        data.message?.toLowerCase().includes("user not found")
-      ) {
-        navigate("/register");
-        return alert("Register yourself First!");
-      }
+  } finally {
+    setLoading(false);
+  }
+};
 
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.message || "Login failed");
-      }
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setError();
+  //   setSuccess("");
 
-      setSuccess(data.message || "Login successful!");
-      // setFormData({ email: "", password: "" });
-      window.localStorage.setItem("user_id", data.user.id);
-      // window.localStorage.setItem("user_email: ", data.user.email);
-      // window.localStorage.setItem("user_name: ", data.user.username);
-      window.location.assign("/transactions");
-    } catch (err) {
-      setError("Invalid login");
-    } finally {
-      setLoading(false);
-    }
-  };
+  //   const validationError = validateForm();
+  //   if (validationError) {
+  //     setError(validationError);
+  //     return;
+  //   }
+
+  //   try {
+  //     setLoading(true);
+  //     const response = await API.post("/auth/login",formData
+  //     //    {
+  //     //   method: "POST",
+  //     //   headers: { "Content-Type": "application/json" }, credentials: "include",
+  //     //   body: JSON.stringify(formData),
+  //     // }
+  //   );
+  //     const data = await response.json();
+
+  //     // Redirect to registration if user does not exist
+  //     if (
+  //       response.status === 404 ||
+  //       data.message?.toLowerCase().includes("user not found")
+  //     ) {
+  //       navigate("/register");
+  //       return alert("Register yourself First!");
+  //     }
+
+  //     if (!response.ok) {
+  //       const errData = await response.json();
+  //       throw new Error(errData.message || "Login failed");
+  //     }
+  //     localStorage.setItem("isLoggedIn", "true");
+
+
+  //     setSuccess(data.message || "Login successful!");
+  //     // setFormData({ email: "", password: "" });
+  //     // window.localStorage.setItem("user_id", data.user.id);
+  //     // window.localStorage.setItem("user_email: ", data.user.email);
+  //     // window.localStorage.setItem("user_name: ", data.user.username);
+  //     // setTimeout(() => {
+  //     //   navigate("/transactions");
+  //     // }, 1000);
+  //     window.location.reload();
+  //   } catch (err) {
+  //     setError("Invalid login");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   return (
     <div

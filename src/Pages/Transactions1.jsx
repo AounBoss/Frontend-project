@@ -3,21 +3,49 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Snackbar, Alert } from "@mui/material";
-
-import axios from "axios";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import Modal from "@mui/material/Modal";
+import ReusableModal from "./modal.jsx";
+import Table from "./Table.jsx";
+import API from "../api/axios";
 
 const API_URL = "http://localhost:4000/api/v1/transactions";
 const CATEGORY_URL = "http://localhost:4000/api/v1/categories";
 
 function Transactions() {
-  const userId = window.localStorage.getItem("user_id");
+  // const userId = window.localStorage.getItem("user_id");
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState("add");
+  const handleOpen = (type = "add") => {
+    setMode(type);
+    if (type === "add") {
+      setEditingId(null);
+      setFormData({
+        type: "",
+        category: "",
+        // userId: userId || "",
+        date: "",
+        description: "",
+        amount: "",
+      });
+    }
+    // koi variable banao gey jo ke add ya edit mode mein khole ga aap ka omdal
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const [formData, setFormData] = useState({
     type: "",
     category: "",
-    userId: localStorage.getItem("userId") || "",
+    // userId: localStorage.getItem("userId") || "",
     date: "",
     description: "",
     amount: "",
@@ -30,13 +58,14 @@ function Transactions() {
   const [error, setError] = useState("");
   const fetchCategories = async () => {
     try {
-      const res = await axios.get(
-        `${"http://localhost:4000/api/v1/categories/get"}`,
-        {
-          headers: {
-            "X-User-Id": userId,
-          },
-        },
+      const res = await API.get(
+        "/categories/get"
+        
+          // headers: {
+          //   "X-User-Id": userId,
+          // },
+        
+        
       );
 
       console.log("Categories:", res.data);
@@ -51,13 +80,12 @@ function Transactions() {
   // GET all transactions
   const fetchTransactions = async () => {
     try {
-      const res = await axios.get(
-        `${"http://localhost:4000/api/v1/transactions/get"}`,
-        {
-          headers: {
-            "X-User-Id": userId,
-          },
-        },
+      const res = await API.get(
+        "/transactions/get"
+
+        
+          
+        
       );
 
       console.log("API response:", res.data);
@@ -70,8 +98,8 @@ function Transactions() {
   };
   const fetchTransactionById = async (id) => {
     try {
-      const res = await axios.get(
-        `${"http://localhost:4000/api/v1/transactions/get"}/${id}`,
+      const res = await API.get(
+        `${"/transactions/get"}/${id}`,
       );
 
       const transaction = res.data.transaction;
@@ -82,7 +110,7 @@ function Transactions() {
           typeof transaction.category === "object"
             ? transaction.category._id || ""
             : transaction.category || "",
-        userId: transaction.userId?._id || localStorage.getItem("userId"),
+        // userId: transaction.userId?._id || localStorage.getItem("userId"),
         date: transaction.date ? String(transaction.date).slice(0, 10) : "",
         description: transaction.description,
         amount: transaction.amount,
@@ -101,15 +129,15 @@ function Transactions() {
     setError("");
 
     // Get user ID from localStorage
-    const userId = window.localStorage.getItem("user_id");
-    if (!userId) {
-      setError("User is not logged in");
-      return;
-    }
+    // const userId = window.localStorage.getItem("user_id");
+    // if (!userId) {
+    //   setError("User is not logged in");
+    //   return;
+    // }
 
     const data = {
       ...formData,
-      userId: userId,
+      // userId: userId,
     };
 
     console.log("formData Values: ", formData);
@@ -122,14 +150,14 @@ function Transactions() {
 
     try {
       if (editingId) {
-        await axios.put(
-          `${"http://localhost:4000/api/v1/transactions/update"}/${editingId}`,
+        await API.put(
+          `${"/transactions/update"}/${editingId}`,
 
           data,
         );
       } else {
-        await axios.post(
-          `${"http://localhost:4000/api/v1/transactions/create"}`,
+        await API.post(
+          `${"/transactions/create"}`,
           data,
         );
       }
@@ -138,13 +166,14 @@ function Transactions() {
       setFormData({
         type: "",
         category: "",
-        userId: userId,
+        // userId: userId,
         date: "",
         description: "",
         amount: "",
       });
 
       setEditingId(null);
+      setOpen(false);
 
       await fetchTransactions();
     } catch (err) {
@@ -158,8 +187,8 @@ function Transactions() {
   // DELETE
   const handleDelete = async (id) => {
     try {
-      await axios.delete(
-        `${"http://localhost:4000/api/v1/transactions/delete"}/${id}`,
+      await API.delete(
+        `${"/transactions/delete"}/${id}`,
       );
 
       await fetchTransactions();
@@ -168,28 +197,100 @@ function Transactions() {
       setError("Failed to delete transaction");
     }
   };
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    try {
-      // 1. Call the logout API with the user ID
-      await fetch("/api/logout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId }),
-      });
+  // const handleLogout = async () => {
+  //   try {
+  //     // 1. Call the logout API with the user ID
+  //     await fetch("/api/logout", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({ userId }),
+  //     });
 
-      // 2. Clear local storage (or specific items)
-      localStorage.clear();
+  //     // 2. Clear local storage (or specific items)
+  //     localStorage.clear();
 
-      // 3. Redirect to login page
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
+  //     // 3. Redirect to login page
+  //     navigate("/login");
+  //   } catch (error) {
+  //     console.error("Logout failed:", error);
+  //   }};
+  // };const cellStyle = {
+  // padding: "14px 16px",
+  // textAlign: "left",
+  // fontSize: "12px",
+  // color: "#374151",
+  // borderBottom: "1px solid #e5e7eb",
+  // verticalAlign: "middle",
+  const columns = [
+    {
+      key: "type",
+      label: "Type",
+      render: (t) => (
+        <span
+          style={{
+            color: t.type === "Income" ? "green" : "red",
+            fontWeight: "600",
+          }}
+        >
+          {t.type}
+        </span>
+      ),
+    },
+    {
+      key: "category",
+      label: "Category",
+      render: (t) => t.category?.name || "-",
+    },
+    {
+      key: "date",
+      label: "Date",
+      cellStyle: { whiteSpace: "nowrap" },
+      render: (t) =>
+        t.date ? new Date(t.date).toLocaleDateString("en-GB") : "-",
+    },
+    {
+      key: "description",
+      label: "Description",
+    },
+    {
+      key: "amount",
+      label: "Amount",
+      cellStyle: {
+        fontWeight: "600",
+        whiteSpace: "nowrap",
+      },
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      cellStyle: { whiteSpace: "nowrap" },
+      render: (t) => (
+        <>
+          <EditIcon
+            onClick={() => {
+              handleOpen("edit");
+              fetchTransactionById(t._id);
+            }}
+            style={{
+              cursor: "pointer",
+              marginRight: "12px",
+              fontSize: "18px",
+              marginTop: "12px",
+            }}
+          />
+
+          <DeleteIcon
+            onClick={() => handleDelete(t._id)}
+            style={{ cursor: "pointer", fontSize: "18px", marginBottom: "1px" }}
+          />
+        </>
+      ),
+    },
+  ];
 
   useEffect(() => {
     fetchTransactions();
@@ -197,602 +298,511 @@ function Transactions() {
   }, []);
 
   return (
-    <div>
-      <Dashboard />
+    <div
+      style={{
+        width: "100%",
+      }}
+    >
+      {/* <Dashboard /> */}
       <div
+        className="Card1"
         style={{
           minHeight: "100vh",
           backgroundColor: "white",
           padding: "30px",
         }}
       >
-        {/* Error
-      {error && (
+        {/* Transaction Table */}
         <div
           style={{
-            backgroundColor: "white",
-            color: "red",
-            padding: "12px 15px",
-            borderRadius: "6px",
-            marginBottom: "20px",
-          }}
-        >
-          {error}
-        </div>
-      )} */}
-        <div
-          style={{
-            margin: "0 auto",
+            borderRadius: "8px",
+            border: "1px solid white",
+            overflow: "hidden",
             display: "flex",
-            gap: "40px",
+            flex: 3,
+            flexDirection: "column",
+            alignItems: "start",
           }}
         >
           <div
             style={{
-              borderRadius: "8px",
-              border: "1px solid white",
-              flexDirection: "column",
-              alignItems: "start",
+              marginBottom: "14px",
               display: "flex",
-              flex: 1.5,
+              justifyContent: "space-between",
+              width: "100%",
+              alignItems: "center",
             }}
           >
             <h3
               style={{
-                // margin: "0 0 20px 0",
-                color: "black",
                 fontSize: "20px",
+                color: "black",
               }}
             >
-              {editingId ? "Edit Transaction" : "Add Transaction"}
+              Transaction History
             </h3>
 
-            <form
-              onSubmit={handleSubmit}
-              style={{
-                width: "100%",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "8px",
+            <div>
+              {/* Button to Open the Modal */}
+              <Button
+                variant="contained"
+                onClick={() => {
+                  handleOpen("add");
                 }}
               >
-                <div style={{}}>
-                  <label
-                    style={{
-                      display: "block",
-                      marginBottom: "6px",
-                      fontSize: "14px",
-                      fontWeight: "600",
-                      color: "black",
-                    }}
-                  >
-                    Type
-                  </label>
+                Add Transaction
+              </Button>
 
-                  <select
-                    value={formData.type}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        type: e.target.value,
-                      })
-                    }
-                    style={{
-                      width: "100%",
-                      padding: "11px",
-                      border: "1px solid grey",
-                      borderRadius: "5px",
-                      fontSize: "14px",
-                      backgroundColor: "white",
-                      boxSizing: "border-box",
-                    }}
-                  >
-                    <option value="">Select Type</option>
-                    <option value="Income">Income</option>
-                    <option value="Expense">Expense</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label
-                    style={{
-                      display: "block",
-                      marginBottom: "6px",
-                      fontSize: "14px",
-                      fontWeight: "600",
-                      color: "black",
-                    }}
-                  >
-                    Category
-                  </label>
-                  {/* 
-              <input
-                type="text"
-                placeholder="Enter category ID"
-                value={formData.category}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    category: e.target.value,
-                  })
-                }
-                style={{
-                  width: "100%",
-                  padding: "11px",
-                  border: "1px solid grey",
-                  borderRadius: "5px",
-                  fontSize: "14px",
-                  boxSizing: "border-box",
-                }}
-              /> */}
-                  <select
-                    value={formData.category}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        category: e.target.value,
-                      })
-                    }
-                    style={{
-                      width: "100%",
-                      padding: "11px",
-                      border: "1px solid grey",
-                      borderRadius: "5px",
-                      fontSize: "14px",
-                      boxSizing: "border-box",
-                    }}
-                  >
-                    <option value="">Select Category</option>
-
-                    {categories.map((category) => (
-                      <option key={category._id} value={category._id}>
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label
-                    style={{
-                      display: "block",
-                      marginBottom: "6px",
-                      fontSize: "14px",
-                      fontWeight: "600",
-                      color: "black",
-                    }}
-                  >
-                    Date
-                  </label>
-
-                  <input
-                    type="date"
-                    value={formData.date}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        date: e.target.value,
-                      })
-                    }
-                    style={{
-                      width: "100%",
-                      padding: "10px",
-                      border: "1px solid grey",
-                      borderRadius: "5px",
-                      fontSize: "14px",
-                      boxSizing: "border-box",
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label
-                    style={{
-                      display: "block",
-                      marginBottom: "6px",
-                      fontSize: "14px",
-                      fontWeight: "600",
-                      color: "black",
-                    }}
-                  >
-                    Description
-                  </label>
-
-                  <input
-                    type="text"
-                    placeholder="Enter description"
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        description: e.target.value,
-                      })
-                    }
-                    style={{
-                      width: "100%",
-                      padding: "11px",
-                      border: "1px solid grey",
-                      borderRadius: "5px",
-                      fontSize: "14px",
-                      boxSizing: "border-box",
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label
-                    style={{
-                      display: "block",
-                      marginBottom: "6px",
-                      fontSize: "14px",
-                      fontWeight: "600",
-                      color: "black",
-                    }}
-                  >
-                    Amount
-                  </label>
-
-                  <input
-                    type="number"
-                    placeholder="Enter amount"
-                    value={formData.amount}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        amount: e.target.value,
-                      })
-                    }
-                    style={{
-                      width: "100%",
-                      padding: "11px",
-                      border: "1px solid grey",
-                      borderRadius: "5px",
-                      fontSize: "14px",
-                      boxSizing: "border-box",
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div
-                style={{
-                  marginTop: "22px",
-                  display: "flex",
-                  flex: 2,
-                  gap: "10px",
-                  // marginleft: "1000px",
-                }}
+              <ReusableModal
+                open={open}
+                handleClose={handleClose}
+                title={mode === "edit" ? "Edit Transaction" : "Add Transaction"}
               >
-                <button
-                  type="submit"
+                {/* <Box
+                  sx={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    width: 400,
+                    bgcolor: "background.paper",
+                    border: "2px solid #000",
+                    boxShadow: 24,
+                    p: 4,
+                    overflow: "auto",
+                    maxHeight: "85%",
+                  }}
+                > */}
+                {/* <div
+                    style={{
+                      heigth: "20px",
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                    }}
+                  > */}
+                {/* <Typography
+                      id="modal-modal-title"
+                      variant="h6"
+                      component="h2"
+                      sx={{
+                        fontSize: "18px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {mode === "edit" ? "Edit Transaction" : "Add Transaction"}
+                    </Typography> */}
+                {/* Button to Close the Modal Inside Content */}
+                {/* <Button
+                      variant="text"
+                      color="error"
+                      sx={{ }}
+                      onClick={handleClose}
+                      
+                    >
+                      X
+                    </Button> */}
+                {/* </div> */}
+
+                <div
                   style={{
-                    padding: "20px 20px",
-                    backgroundColor: "blue",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "5px",
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    cursor: "pointer",
-                    width: "100%",
+                    borderRadius: "8px",
+                    border: "1px solid white",
+                    flexDirection: "column",
+                    alignItems: "start",
+                    display: "flex",
+                    flex: 1.5,
                   }}
                 >
-                  {editingId ? "Update Transaction" : "Add Transaction"}
-                </button>
-
-                {editingId && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditingId(null);
-                      setFormData({
-                        type: "",
-                        category: "",
-                        userId: "",
-                        date: "",
-                        description: "",
-                        amount: "",
-                      });
-                    }}
+                  <form
+                    onSubmit={handleSubmit}
                     style={{
-                      padding: "10px 20px",
-                      backgroundColor: "grey",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "5px",
-                      fontSize: "14px",
-                      cursor: "pointer",
+                      width: "100%",
                     }}
                   >
-                    Cancel
-                  </button>
-                )}
-              </div>
-            </form>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "8px",
+                      }}
+                    >
+                      <div style={{}}>
+                        <label
+                          style={{
+                            display: "block",
+                            marginBottom: "6px",
+                            fontSize: "14px",
+                            fontWeight: "600",
+                            color: "black",
+                          }}
+                        >
+                          Type
+                        </label>
+
+                        <select
+                          value={formData.type}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              type: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: "100%",
+                            padding: "11px",
+                            border: "1px solid grey",
+                            borderRadius: "5px",
+                            fontSize: "14px",
+                            backgroundColor: "white",
+                            boxSizing: "border-box",
+                          }}
+                        >
+                          <option value="">Select Type</option>
+                          <option value="Income">Income</option>
+                          <option value="Expense">Expense</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label
+                          style={{
+                            display: "block",
+                            marginBottom: "6px",
+                            fontSize: "14px",
+                            fontWeight: "600",
+                            color: "black",
+                          }}
+                        >
+                          Category
+                        </label>
+                        <select
+                          value={formData.category}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              category: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: "100%",
+                            padding: "11px",
+                            border: "1px solid grey",
+                            borderRadius: "5px",
+                            fontSize: "14px",
+                            boxSizing: "border-box",
+                          }}
+                        >
+                          <option value="">Select Category</option>
+
+                          {categories.map((category) => (
+                            <option key={category._id} value={category._id}>
+                              {category.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label
+                          style={{
+                            display: "block",
+                            marginBottom: "6px",
+                            fontSize: "14px",
+                            fontWeight: "600",
+                            color: "black",
+                          }}
+                        >
+                          Date
+                        </label>
+
+                        <input
+                          type="date"
+                          value={formData.date}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              date: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: "100%",
+                            padding: "10px",
+                            border: "1px solid grey",
+                            borderRadius: "5px",
+                            fontSize: "14px",
+                            boxSizing: "border-box",
+                          }}
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          style={{
+                            display: "block",
+                            marginBottom: "6px",
+                            fontSize: "14px",
+                            fontWeight: "600",
+                            color: "black",
+                          }}
+                        >
+                          Description
+                        </label>
+
+                        <input
+                          type="text"
+                          placeholder="Enter description"
+                          value={formData.description}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              description: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: "100%",
+                            padding: "11px",
+                            border: "1px solid grey",
+                            borderRadius: "5px",
+                            fontSize: "14px",
+                            boxSizing: "border-box",
+                          }}
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          style={{
+                            display: "block",
+                            marginBottom: "6px",
+                            fontSize: "14px",
+                            fontWeight: "600",
+                            color: "black",
+                          }}
+                        >
+                          Amount
+                        </label>
+
+                        <input
+                          type="number"
+                          placeholder="Enter amount"
+                          value={formData.amount}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              amount: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: "100%",
+                            padding: "11px",
+                            border: "1px solid grey",
+                            borderRadius: "5px",
+                            fontSize: "14px",
+                            boxSizing: "border-box",
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        marginTop: "22px",
+                        display: "flex",
+                        flex: 2,
+                        gap: "10px",
+                        // marginleft: "1000px",
+                      }}
+                    >
+                      <button
+                        type="submit"
+                        style={{
+                          padding: "20px 20px",
+                          backgroundColor: "blue",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "5px",
+                          fontSize: "14px",
+                          fontWeight: "600",
+                          cursor: "pointer",
+                          width: "100%",
+                        }}
+                      >
+                        {mode === "edit"
+                          ? "Update Transaction"
+                          : "Add Transaction"}
+                      </button>
+
+                      {editingId && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingId(null);
+                            setFormData({
+                              type: "",
+                              category: "",
+                              userId: "",
+                              date: "",
+                              description: "",
+                              amount: "",
+                            });
+                          }}
+                          style={{
+                            padding: "10px 20px",
+                            backgroundColor: "grey",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "5px",
+                            fontSize: "14px",
+                            cursor: "pointer",
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      )}
+                    </div>
+                  </form>
+                </div>
+              </ReusableModal>
+            </div>
           </div>
 
-          {/* Transaction Table */}
-          <div
+          {/* <div style={{ overflowX: "auto", width: "100%" }}>
+  <table
+    style={{
+      width: "100%",
+      borderCollapse: "collapse",
+      border: "1px solid #e5e7eb",
+      tableLayout: "auto",
+    }}
+  >
+    <thead>
+      <tr style={{ backgroundColor: "#ffffff" }}>
+        {[
+          "Type",
+          "Category",
+          "Date",
+          "Description",
+          "Amount",
+          "Actions",
+        ].map((heading) => (
+          <th
+            key={heading}
             style={{
-              borderRadius: "8px",
-              border: "1px solid white",
-              overflow: "hidden",
-              display: "flex",
-              flex: 3,
-              flexDirection: "column",
-              alignItems: "start",
+              padding: "14px 16px",
+              textAlign: "left",
+              fontSize: "12px",
+              fontWeight: "600",
+              color: "#6b7280",
+              borderBottom: "1px solid #e5e7eb",
+              whiteSpace: "nowrap",
             }}
           >
-            <div
+            {heading}
+          </th>
+        ))}
+      </tr>
+    </thead>
+
+    <tbody>
+      {sortedTransactions.length > 0 ? (
+        sortedTransactions.map((t, index) => (
+          <tr
+            key={t._id}
+            style={{
+              backgroundColor:
+                index % 2 === 0 ? "#f9fafb" : "#ffffff",
+            }}
+          >
+            <td style={cellStyle}>
+              <span
+                style={{
+                  color: t.type === "Income" ? "green" : "red",
+                  fontSize: "12px",
+                  fontWeight: "600",
+                }}
+              >
+                {t.type}
+              </span>
+            </td>
+
+            <td style={cellStyle}>
+              {t.category?.name || "-"}
+            </td>
+
+            <td style={{ ...cellStyle, whiteSpace: "nowrap" }}>
+              {t.date
+                ? new Date(t.date).toLocaleDateString("en-GB")
+                : "-"}
+            </td>
+
+            <td style={cellStyle}>
+              {t.description || "-"}
+            </td>
+
+            <td
               style={{
-                marginBottom: "14px",
-                display: "flex",
-                justifyContent: "space-between",
-                width: "100%",
-                alignItems: "center",
+                ...cellStyle,
+                fontWeight: "600",
+                whiteSpace: "nowrap",
               }}
             >
-              <h3
-                style={{
-                  fontSize: "20px",
-                  color: "black",
+              {t.amount}
+            </td>
+
+            <td
+              style={{
+                ...cellStyle,
+                whiteSpace: "nowrap",
+              }}
+            >
+              <EditIcon
+                onClick={() => {
+                  handleOpen("edit");
+                  fetchTransactionById(t._id);
                 }}
-              >
-                Transaction History
-              </h3>
-              <div style={{ display: "flex", gap: "20px" }}>
-                {" "}
-                <Link to="/categories">
-                  {" "}
-                  <button
-                    style={{
-                      backgroundColor: "blue",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "5px",
-                      fontSize: "10x",
-                      fontWeight: "600",
-                      cursor: "pointer",
-                      height: "100%",
-                      width: "100%",
-                      padding: "6px 12px ",
-                      marginRight: "30px",
-                      marginBottom: "1px",
-                    }}
-                  >
-                    Add Category
-                  </button>
-                </Link>{" "}
-                <button
-                  onClick={handleLogout}
-                  style={{
-                    backgroundColor: "blue",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "5px",
-                    fontSize: "10x",
-                    fontWeight: "600",
-                    cursor: "pointer",
-                    height: "100%",
-                    width: "100% ",
-                    padding: " 20px 15px ",
-                    marginTop: "2px",
-                  }}
-                >
-                  Logout
-                </button>
-              </div>
-            </div>
-
-            <div style={{ overflowX: "auto", width: "100%" }}>
-              <table
                 style={{
-                  width: "100%",
-                  borderCollapse: "collapse",
+                  marginRight: "12px",
+                  cursor: "pointer",
+                  fontSize: "18px",
+                  verticalAlign: "middle",
                 }}
-              >
-                <thead>
-                  <tr
-                    style={{
-                      backgroundColor: "white",
-                    }}
-                  >
-                    <th
-                      style={{
-                        padding: "13px 15px",
-                        borderBottom: "1px solid white",
-                        textAlign: "left",
-                        fontSize: "13px",
-                        color: "black",
-                      }}
-                    >
-                      Type
-                    </th>
+              />
 
-                    <th
-                      style={{
-                        padding: "13px 15px",
-                        borderBottom: "1px solid grey",
-                        textAlign: "left",
-                        fontSize: "13px",
-                        color: "grey",
-                      }}
-                    >
-                      Category
-                    </th>
-
-                    <th
-                      style={{
-                        padding: "13px 15px",
-                        borderBottom: "1px solid grey",
-                        textAlign: "left",
-                        fontSize: "13px",
-                        color: "black",
-                      }}
-                    >
-                      Date
-                    </th>
-
-                    <th
-                      style={{
-                        padding: "13px 15px",
-                        borderBottom: "1px solid grey",
-                        textAlign: "left",
-                        fontSize: "13px",
-                        color: "black",
-                      }}
-                    >
-                      Description
-                    </th>
-
-                    <th
-                      style={{
-                        padding: "13px 15px",
-                        borderBottom: "1px solid grey",
-                        textAlign: "left",
-                        fontSize: "13px",
-                        color: "grey",
-                      }}
-                    >
-                      Amount
-                    </th>
-
-                    <th
-                      style={{
-                        padding: "13px 15px",
-                        borderBottom: "1px solid grey",
-                        textAlign: "left",
-                        fontSize: "13px",
-                        color: "black",
-                      }}
-                    >
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {transactions.length > 0 ? (
-                    sortedTransactions.map((t) => (
-                      <tr key={t._id}>
-                        <td
-                          style={{
-                            padding: "13px 15px",
-                            borderBottom: "1px solid grey",
-                          }}
-                        >
-                          <span
-                            style={{
-                              padding: "4px 9px",
-                              borderRadius: "4px",
-                              backgroundColor:
-                                t.type === "Income" ? "white" : "white",
-                              color: t.type === "Income" ? "green" : "red",
-                              fontSize: "12px",
-                              fontWeight: "600",
-                            }}
-                          >
-                            {t.type}
-                          </span>
-                        </td>
-
-                        <td
-                          style={{
-                            padding: "13px 15px",
-                            borderBottom: "1px solid grey",
-                          }}
-                        >
-                          {t.category?.name || "-"}
-                        </td>
-
-                        <td
-                          style={{
-                            padding: "13px 15px",
-                            borderBottom: "1px solid grey",
-                          }}
-                        >
-                          {t.date
-                            ? new Date(t.date).toLocaleDateString("en-GB")
-                            : "-"}
-                        </td>
-
-                        <td
-                          style={{
-                            padding: "13px 15px",
-                            borderBottom: "1px solid grey",
-                          }}
-                        >
-                          {t.description || "-"}
-                        </td>
-
-                        <td
-                          style={{
-                            padding: "13px 15px",
-                            borderBottom: "1px solid white",
-                            fontWeight: "600",
-                          }}
-                        >
-                          {t.amount}
-                        </td>
-
-                        <td
-                          style={{
-                            padding: "13px 15px",
-                            borderBottom: "1px solid grey",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          <button
-                            onClick={() => fetchTransactionById(t._id)}
-                            style={{
-                              padding: "6px 12px",
-                              marginRight: "6px",
-                              backgroundColor: "blue",
-                              color: "white",
-                              border: "none",
-                              borderRadius: "4px",
-                              cursor: "pointer",
-                            }}
-                          >
-                            Edit
-                          </button>
-
-                          <button
-                            onClick={() => handleDelete(t._id)}
-                            style={{
-                              padding: "6px 12px",
-                              backgroundColor: "red",
-                              color: "white",
-                              border: "none",
-                              borderRadius: "4px",
-                              cursor: "pointer",
-                            }}
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan="7"
-                        style={{
-                          padding: "30px",
-                          textAlign: "center",
-                          color: "black",
-                        }}
-                      ></td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+              <DeleteIcon
+                onClick={() => handleDelete(t._id)}
+                style={{
+                  cursor: "pointer",
+                  fontSize: "18px",
+                  verticalAlign: "middle",
+                }}
+              />
+            </td>
+          </tr>
+        ))
+      ) : (
+        <tr>
+          <td
+            colSpan={6}
+            style={{
+              padding: "30px",
+              textAlign: "center",
+              color: "#6b7280",
+            }}
+          >
+            No transactions found
+          </td>
+        </tr>
+      )}
+    </tbody>
+  </table>
+</div> */}
+          <Table
+            columns={columns}
+            data={sortedTransactions}
+            getRowKey={(t) => t._id}
+            emptyMessage="No transactions found"
+          />
         </div>
       </div>{" "}
       <Snackbar
